@@ -3,26 +3,13 @@ import prisma from "@/lib/prisma";
 import { Loader2 } from "lucide-react";
 import React, { Suspense } from "react";
 import UserAvatar from "./UserAvatar";
-import { Button } from "./ui/button";
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { formatNumber } from "@/lib/utils";
+import FollowButton from "./FollowButton";
+import { getUserDataSelect } from "@/lib/types";
 
-const TrendsSidebar = () => {
-  console.log("TrendsSidebar rendered");
-  return (
-    <div className="sticky top-[5.25rem] hidden h-fit w-72 flex-none space-y-5 md:block lg:w-80">
-      <Suspense fallback={<Loader2 className="mx-auto animate-spin" />}>
-        <WhoToFollow />
-        <TrendingTopics />
-      </Suspense>
-    </div>
-  );
-};
-
-export default TrendsSidebar;
-
-export const WhoToFollow = async () => {
+const WhoToFollow = async () => {
   const { user } = await validateRequest();
 
   if (!user) return null;
@@ -32,16 +19,15 @@ export const WhoToFollow = async () => {
       NOT: {
         id: user.id,
       },
+      followers: {
+        none: {
+          followerId: user.id,
+        },
+      },
     },
-    select: {
-      id: true,
-      username: true,
-      displayName: true,
-      avatarUrl: true,
-    },
+    select: getUserDataSelect(user.id),
+    take: 5,
   });
-
-  console.log("WhoToFollow rendered", usersToFollow);
 
   return (
     <div className="space-y-5 rounded-2xl bg-card p-5 shadow-sm">
@@ -66,7 +52,15 @@ export const WhoToFollow = async () => {
               </p>
             </div>
           </Link>
-          <Button>Follow</Button>
+          <FollowButton
+            userId={user.id}
+            initialState={{
+              followersCount: user._count.followers,
+              isFollowedByUser: user.followers.some(
+                (follower) => follower.followerId === user.id,
+              ),
+            }}
+          />
         </div>
       ))}
     </div>
@@ -102,8 +96,6 @@ const getTrendingTopics = unstable_cache(
 const TrendingTopics = async () => {
   const trendingTopics = await getTrendingTopics();
 
-  console.log("TrendingTopics rendered", trendingTopics);
-
   return (
     <div className="space-y-5 rounded-2xl bg-card p-5 shadow-sm">
       <div className="text-xl font-bold">Trending topics</div>
@@ -126,3 +118,16 @@ const TrendingTopics = async () => {
     </div>
   );
 };
+
+const TrendsSidebar = () => {
+  return (
+    <div className="sticky top-[5.25rem] hidden h-fit w-72 flex-none space-y-5 md:block lg:w-80">
+      <Suspense fallback={<Loader2 className="mx-auto animate-spin" />}>
+        <WhoToFollow />
+        <TrendingTopics />
+      </Suspense>
+    </div>
+  );
+};
+
+export default TrendsSidebar;

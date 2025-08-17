@@ -5,32 +5,45 @@ import { NextRequest } from "next/server";
 
 export const GET = async (req: NextRequest) => {
   const cursor = req.nextUrl.searchParams.get("cursor");
-
   const pageSize = 10;
 
+  const { user } = await validateRequest();
+
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const { user } = await validateRequest();
-
-    if (!user) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const posts = await prisma.post.findMany({
-      include: getPostDataInclude(user.id),
-      orderBy: { createdAt: "desc" },
-      take: pageSize + 1,
+      where: {
+        user: {
+          followers: {
+            some: {
+              followerId: user.id,
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: pageSize,
+      skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
+      include: getPostDataInclude(user.id),
     });
 
-    const nextCursor = posts.length > pageSize ? posts[pageSize].id : null;
+    const nextCursor =
+      posts.length === pageSize ? posts[posts.length - 1].id : null;
 
     const data: PaginatedPostsDataType = {
-      posts: posts.slice(0, pageSize),
+      posts,
       nextCursor,
     };
 
     return Response.json(data);
   } catch (error) {
+    console.error(error);
     return Response.json({ error: "Internal Server Error" }, { status: 500 });
   }
 };

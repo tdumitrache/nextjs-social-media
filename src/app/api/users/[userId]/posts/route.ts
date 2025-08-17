@@ -3,7 +3,10 @@ import prisma from "@/lib/prisma";
 import { getPostDataInclude, PaginatedPostsDataType } from "@/lib/types";
 import { NextRequest } from "next/server";
 
-export const GET = async (req: NextRequest) => {
+export const GET = async (
+  req: NextRequest,
+  { params }: { params: { userId: string } },
+) => {
   const cursor = req.nextUrl.searchParams.get("cursor");
 
   const pageSize = 10;
@@ -16,6 +19,9 @@ export const GET = async (req: NextRequest) => {
     }
 
     const posts = await prisma.post.findMany({
+      where: {
+        userId: params.userId,
+      },
       include: getPostDataInclude(user.id),
       orderBy: { createdAt: "desc" },
       take: pageSize + 1,

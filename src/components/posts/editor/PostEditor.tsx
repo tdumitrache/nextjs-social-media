@@ -4,14 +4,17 @@ import React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { submitPost } from "./actions";
 import UserAvatar from "@/components/UserAvatar";
 import { useSession } from "@/app/(main)/SessionProvider";
 import { Button } from "@/components/ui/button";
+import useSubmitPostMutation from "./mutations";
 import "./styles.css";
+import LoadingButton from "@/components/LoadingButton";
 
 const PostEditor = () => {
   const { user } = useSession();
+
+  const { mutate: submitPost, isPending } = useSubmitPostMutation();
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -32,8 +35,11 @@ const PostEditor = () => {
     }) || "";
 
   const onSubmit = async () => {
-    await submitPost(input);
-    editor?.commands.setContent("");
+    submitPost(input, {
+      onSuccess: () => {
+        editor?.commands.setContent("");
+      },
+    });
   };
 
   return (
@@ -46,13 +52,14 @@ const PostEditor = () => {
         />
       </div>
       <div className="flex justify-end">
-        <Button
+        <LoadingButton
+          isLoading={isPending}
           onClick={onSubmit}
           disabled={!input.trim()}
           className="min-w-20"
         >
           Post
-        </Button>
+        </LoadingButton>
       </div>
     </div>
   );

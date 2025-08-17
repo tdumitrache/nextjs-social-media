@@ -8,7 +8,7 @@ import { PaginatedPostsDataType, PostData } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
-const ForYouFeed = () => {
+const FollowingFeed = () => {
   const {
     data,
     fetchNextPage,
@@ -17,11 +17,11 @@ const ForYouFeed = () => {
     isFetching,
     status,
   } = useInfiniteQuery({
-    queryKey: ["post-feed", "for-you"],
+    queryKey: ["post-feed", "following"],
     queryFn: ({ pageParam }) =>
       kyInstance
         .get(
-          "/api/posts/for-you",
+          "/api/posts/following",
           pageParam ? { searchParams: { cursor: pageParam } } : {},
         )
         .json<PaginatedPostsDataType>(),
@@ -36,7 +36,7 @@ const ForYouFeed = () => {
   if (status === "success" && posts.length === 0 && !hasNextPage)
     return (
       <p className="text-center text-muted-foreground">
-        No posts found. Follow some users to get started.
+        No posts found. Start following some users to get started.
       </p>
     );
 
@@ -62,4 +62,4 @@ const ForYouFeed = () => {
   );
 };
 
-export default ForYouFeed;
+export default FollowingFeed;
