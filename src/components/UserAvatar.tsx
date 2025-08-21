@@ -1,19 +1,22 @@
-import React from "react";
 import avatarPlaceholder from "@/assets/avatar-placeholder.png";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface UserAvatarProps {
-  avatarUrl?: string | null;
+  avatarUrl: string | null | undefined;
   size?: number;
   className?: string;
 }
 
-const UserAvatar = ({ avatarUrl, size, className }: UserAvatarProps) => {
+export default function UserAvatar({
+  avatarUrl,
+  size,
+  className,
+}: UserAvatarProps) {
   return (
     <Image
       src={avatarUrl || avatarPlaceholder}
-      alt="avatar"
+      alt="User avatar"
       width={size ?? 48}
       height={size ?? 48}
       className={cn(
@@ -22,6 +25,4 @@ const UserAvatar = ({ avatarUrl, size, className }: UserAvatarProps) => {
       )}
     />
   );
-};
-
-export default UserAvatar;
+}

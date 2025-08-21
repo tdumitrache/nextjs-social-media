@@ -15,8 +15,6 @@ export default function FollowerCount({
 }: FollowerCountProps) {
   const { data } = useFollowerInfo(userId, initialState);
 
-  console.log(data);
-
   return (
     <span>
       Followers:{" "}

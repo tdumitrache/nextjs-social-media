@@ -79,8 +79,6 @@ export const POST = async (
       update: {},
     });
 
-    console.log("Followed user", userId);
-
     return new Response();
   } catch (error) {
     return Response.json({ error: "Internal Server Error" }, { status: 500 });
