@@ -31,7 +31,6 @@ const PostEditor = () => {
   } = useMediaUpload();
 
   const editor = useEditor({
-    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bold: false,
