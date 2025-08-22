@@ -29,7 +29,7 @@ model User {
   username     String    @unique
   displayName  String
   email        String?   @unique
-  passwordHash String?
+  passwordHash String
   googleId     String?   @unique
   avatarUrl    String?
   bio          String?
